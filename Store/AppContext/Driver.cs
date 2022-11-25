@@ -1,0 +1,371 @@
+﻿using Store.DBManager.Dao;
+using Store.Model;
+using Store.Model.Goods;
+using Store.Model.User;
+
+namespace Store.AppContext;
+
+public class Driver
+{
+    private readonly DaoUser _daoUser;
+    private readonly DaoHistory _daoHistory;
+    private readonly DaoGoods _daoGoods;
+
+    public Driver(AppContext appContext)
+    {
+        _daoUser = new DaoUser(appContext.DbContext);
+        _daoHistory = new DaoHistory(appContext.DbContext);
+        _daoGoods = new DaoGoods(appContext.DbContext);
+    }
+
+    public void Starter()
+    {
+        bool repeat = true;
+        while (repeat)
+        {
+            Console.WriteLine("----------Hello in book store----------");
+            Console.WriteLine("Enter:  '1' - open login menu;\n\t" +
+                              "'0' - exit;");
+            Console.Write("-> ");
+            int way = Convert.ToInt32(Console.ReadLine());
+
+            switch (way)
+            {
+                case 1:
+                    LoginMenu();
+                    break;
+                case 0:
+                    Console.WriteLine("Bye");
+                    repeat = false;
+                    break;
+                default:
+                    Console.WriteLine("Maybe you`ve misclicked. Try again.\n");
+                    break;
+            }
+        }
+    }
+
+    private void LoginMenu()
+    {
+        Console.Write("----------Login Menu----------" +
+                      "\nEnter your name: ");
+        var name = Console.ReadLine();
+
+        if (name == null) return;
+
+        var user = _daoUser.FindByName(name);
+
+        if (user == null)
+        {
+            Console.WriteLine("Please, ask administrator to add you to system.\n");
+            return;
+        }
+
+        MainMenu(user);
+    }
+
+    private void MainMenu(User user)
+    {
+        var repeat = true;
+
+        while (repeat)
+        {
+            Console.WriteLine("\n----------Main menu----------");
+            Console.WriteLine("Enter:  '1' - see info;\n\t" +
+                              "'2' - make deposit;\n\t" +
+                              "'3' - open store;\n\t" +
+                              "'0' - exit;");
+            if (user.Role.Equals(Role.Administrator))
+            {
+                Console.WriteLine("\t'4' - administrator menu;");
+            }
+
+            Console.Write("-> ");
+            var way = Convert.ToInt32(Console.ReadLine());
+
+            switch (way)
+            {
+                case 1:
+                    Console.WriteLine(
+                        $"Name: {user.Name}   Amount Of Money: {user.CreditCard.AmountOfMoney}\t Role: {user.Role}");
+                    break;
+                case 2:
+                    DepositMenu(user);
+                    break;
+                case 3:
+                    StoreMenu(user);
+                    break;
+                case 0:
+                    repeat = false;
+                    break;
+                case 4:
+                    if (!user.Role.Equals(Role.Administrator))
+                    {
+                        Console.WriteLine("Maybe you`ve misclicked. Try again.\n");
+                    }
+                    else
+                        AdministratorMenu();
+
+                    break;
+                default:
+                    Console.WriteLine("Maybe you`ve misclicked. Try again.\n");
+                    break;
+            }
+        }
+
+        Console.WriteLine("-----Thanks. Looking forward to see you later-----\n");
+    }
+
+    private void DepositMenu(User user)
+    {
+        var openMenu = true;
+
+        while (openMenu)
+        {
+            Console.WriteLine("\n----------Deposit menu----------");
+            Console.WriteLine("Enter:  '1' - make deposit;\n\t" +
+                              "'0' - back to main menu;");
+
+            Console.Write("-> ");
+            var way = Convert.ToInt32(Console.ReadLine());
+
+            switch (way)
+            {
+                case 1:
+                    MakeDeposit(user);
+                    break;
+                case 0:
+                    openMenu = false;
+                    break;
+                default:
+                    Console.WriteLine("Maybe you`ve misclicked. Try again.\n");
+                    break;
+            }
+        }
+    }
+    
+    private void StoreMenu(User user)
+    {
+        var openMenu = true;
+
+        while (openMenu)
+        {
+            Console.WriteLine("\n----------Store menu----------");
+            Console.WriteLine("Enter:  '1' - show all books;\n\t" +
+                              "'2' - add to basket;\n\t" +
+                              "'3' - make purchase;\n\t" +
+                              "'4' - show basket;\n\t" +
+                              "'5' - remove from basket;\n\t" +
+                              "'0' - exit;");
+
+            Console.Write("-> ");
+            var way = Convert.ToInt32(Console.ReadLine());
+
+            switch (way)
+            {
+                case 1:
+                    PrintList(_daoGoods.All());
+                    break;
+                case 2:
+                    AddToUserBasket(user);
+                    break;
+                case 3:
+                    MakePurchase(user);
+                    break;
+                case 4:
+                    if (user.GoodsList is { Count: 0 } || user.GoodsList == null)
+                    {
+                        Console.WriteLine("Basket is empty");
+                    }
+                    else
+                    {
+                        Console.WriteLine("Basket:");
+                        PrintList(user.GoodsList);
+                    }
+                    break;
+                case 5:
+                    RemoveItemFromBasket(user);
+                    break;
+                case 0:
+                    openMenu = false;
+                    break;
+                default:
+                    Console.WriteLine("Maybe you`ve misclicked. Try again.\n");
+                    break;
+            }
+        }
+    }
+    
+    private void AdministratorMenu()
+    {
+        var openMenu = true;
+
+        while (openMenu)
+        {
+            Console.WriteLine("\n----------Administrator menu----------");
+            Console.WriteLine("Enter:  '1' - show history;\n\t" +
+                              "'2' - add user;\n\t" +
+                              "'3' - show all users;\n\t" +
+                              "'0' - back to main menu;");
+
+            Console.Write("-> ");
+            var way = Convert.ToInt32(Console.ReadLine());
+
+            switch (way)
+            {
+                case 1:
+                    Console.WriteLine("History: ");
+                    PrintList(_daoHistory.All());
+                    break;
+                case 2:
+                    AddUserToSystem();
+                    break;
+                case 3:
+                    Console.WriteLine("Users: ");
+                    PrintList(_daoUser.All());
+                    break;
+                case 0:
+                    openMenu = false;
+                    break;
+                default:
+                    Console.WriteLine("Maybe you`ve misclicked. Try again.\n");
+                    break;
+            }
+        }
+    }
+
+    private void MakeDeposit(User user)
+    {
+        Console.Write("Enter sum: ");
+        var deposit = Convert.ToInt32(Console.ReadLine());
+
+        if (deposit < 10)
+        {
+            Console.WriteLine("Cannot accept less than 10");
+        }
+        else
+        {
+            if (user.CreditCard != null) user.CreditCard.AmountOfMoney += deposit;
+
+            Console.WriteLine("\nTransaction closed successfully.");
+        }
+    }
+
+    private void PrintList<T>(List<T> listToPrint)
+    {
+        for (int i = 0; i < listToPrint.Count; i++)
+        {
+            Console.WriteLine($"\t{i + 1}.{listToPrint[i]}");
+        }
+    }
+
+    private void AddToUserBasket(User user)
+    {
+        bool repeat = true;
+        while (repeat)
+        {
+            Console.WriteLine("Enter:  '0' - exit\n\t" +
+                              "'Book id' - add to basket;");
+
+            Console.Write("-> ");
+            var option = Convert.ToInt32(Console.ReadLine());
+
+            switch (option)
+            {
+                case 0:
+                    repeat = false;
+                    break;
+                default:
+                    var book = _daoGoods.FindById(option);
+                    user.GoodsList?.Add(book);
+                    Console.WriteLine($"{book.Title}, {book.Price} added to {user.Name} basket.\n");
+                    break;
+            }
+        }
+    }
+
+    private void MakePurchase(User user)
+    {
+        Console.WriteLine("Enter:  '1' - pay\n\t" +
+                          "'0' - exit;");
+
+        Console.Write("-> ");
+        var option = Convert.ToInt32(Console.ReadLine());
+
+        switch (option)
+        {
+            case 1:
+                long totalSum = 0;
+                if (!(user.GoodsList is { Count: 0 }) && user.GoodsList != null)
+                {
+                    totalSum += user.GoodsList.Sum(t => t.Price);
+
+                    if (user.CreditCard != null && user.CreditCard.AmountOfMoney - totalSum > 0)
+                    {
+                        user.CreditCard.AmountOfMoney -= totalSum;
+
+                        foreach (var t in user.GoodsList)
+                        {
+                            _daoHistory.Add(new History(user.Id, t.Id));
+                        }
+
+                        user.GoodsList = new List<Goods>();
+
+                        Console.WriteLine("\nTransaction closed successfully.");
+                    }
+                    else
+                        Console.WriteLine($"\n{user.Name} haven`t enough money to make purchase.");
+                }
+                else
+                    Console.WriteLine("Basket is empty.");
+
+                break;
+            case 0:
+                break;
+            default:
+                Console.WriteLine("Maybe you`ve misclicked. Try again.\n");
+                break;
+        }
+    }
+
+    private void RemoveItemFromBasket(User user)
+    {
+        bool repeat = true;
+        while (repeat)
+        {
+            Console.WriteLine("Enter:  '0' - exit\n\t" +
+                              "'Book id' - remove from basket;");
+
+            Console.Write("-> ");
+            var option = Convert.ToInt32(Console.ReadLine());
+
+            switch (option)
+            {
+                case 0:
+                    repeat = false;
+                    break;
+                default:
+                    var book = _daoGoods.FindById(option);
+                    user.GoodsList?.Remove(book);
+                    Console.WriteLine($"{book.Title}, {book.Price} removed from {user.Name} basket.\n");
+                    break;
+            }
+        }
+    }
+
+    private void AddUserToSystem()
+    {
+        Console.Write("Enter name: ");
+        var userName = Console.ReadLine();
+
+        Console.Write("Role: [admin/customer] ");
+        var roleInput = Console.ReadLine();
+        Role role = roleInput is "admin" ? Role.Administrator : Role.Customer;
+
+        Console.Write("Credit UID: ");
+        var uid = Console.ReadLine();
+
+        _daoUser.Add(new User(userName, uid, role));
+        Console.WriteLine("User added to system.");
+    }
+}
