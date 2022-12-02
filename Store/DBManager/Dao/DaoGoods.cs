@@ -4,7 +4,7 @@ namespace Store.DBManager.Dao;
 
 public class DaoGoods : IDao<Goods>
 {
-    private DbContext DbContext { get;}
+    private DbContext DbContext { get; }
 
     public DaoGoods(DbContext dbContext)
     {
@@ -19,11 +19,27 @@ public class DaoGoods : IDao<Goods>
 
     public List<Goods> All()
     {
-        return DbContext.GoodsList;
+        try
+        {
+            return DbContext.GoodsList;
+        }
+        catch (InvalidOperationException e)
+        {
+            Console.WriteLine("Goods not found.");
+            return null!;
+        }
     }
 
     public Goods FindById(long id)
     {
-        return DbContext.GoodsList.First(x => x.Id.Equals(id));
+        try
+        {
+            return DbContext.GoodsList.First(x => x.Id.Equals(id));
+        }
+        catch (InvalidOperationException e)
+        {
+            Console.WriteLine("Goods not found.");
+            return null!;
+        }
     }
 }

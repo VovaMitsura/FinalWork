@@ -143,7 +143,7 @@ public class Driver
             }
         }
     }
-    
+
     private void StoreMenu(User user)
     {
         var openMenu = true;
@@ -182,6 +182,7 @@ public class Driver
                         Console.WriteLine("Basket:");
                         PrintList(user.GoodsList);
                     }
+
                     break;
                 case 5:
                     RemoveItemFromBasket(user);
@@ -195,7 +196,7 @@ public class Driver
             }
         }
     }
-    
+
     private void AdministratorMenu()
     {
         var openMenu = true;
@@ -277,8 +278,14 @@ public class Driver
                     break;
                 default:
                     var book = _daoGoods.FindById(option);
-                    user.GoodsList?.Add(book);
-                    Console.WriteLine($"{book.Title}, {book.Price} added to {user.Name} basket.\n");
+                    if (book.Amount > 0)
+                    {
+                        user.GoodsList?.Add(book);
+                        Console.WriteLine($"{book.Title}, {book.Price} added to {user.Name} basket.\n");
+                    }
+                    else
+                        Console.WriteLine("No exist item in store.");
+
                     break;
             }
         }
@@ -307,6 +314,12 @@ public class Driver
                         foreach (var t in user.GoodsList)
                         {
                             _daoHistory.Add(new History(user.Id, t.Id));
+                        }
+
+                        foreach (var t in user.GoodsList)
+                        {
+                            var goodsById = _daoGoods.FindById(t.Id);
+                            goodsById.Amount--;
                         }
 
                         user.GoodsList = new List<Goods>();

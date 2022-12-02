@@ -24,7 +24,15 @@ public class DaoUser : IDao<User>
 
     public User FindById(long id)
     {
-        return DbContext.Users.First(x => x.Id.Equals(id));
+        try
+        {
+            return DbContext.Users.First(x => x.Id.Equals(id));
+        }
+        catch (InvalidOperationException e)
+        {
+            Console.WriteLine("User not found.");
+            return null!;
+        }
     }
 
     public User FindByName(String name)

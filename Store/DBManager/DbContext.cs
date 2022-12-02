@@ -36,11 +36,11 @@ public class DbContext
         GoodsList = new List<Goods>
         {
             new Goods(1L, "Clean Code", 600,
-                new SmallDescription("Book", "Author: Robert Cecil Martin")),
+                new SmallDescription("Book", "Author: Robert Cecil Martin"), 2),
             new Goods(2L, "Head First Java", 500,
-                new SmallDescription("Book", "Author: Bert Bates and Kathy Sierra")),
+                new SmallDescription("Book", "Author: Bert Bates and Kathy Sierra"), 3),
             new Goods(3L, "Effective java", 750,
-                new SmallDescription("Book", "Author: Joshua Bloch"))
+                new SmallDescription("Book", "Author: Joshua Bloch"), 2)
         };
     }
 }
