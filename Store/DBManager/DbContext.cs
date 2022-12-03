@@ -16,13 +16,13 @@ public class DbContext
     {
         Users = new List<User>
         {
-            new User(1L, "Jack", new CreditCard("123456", 123456),
+            new User(10L, "Jack", new CreditCard("123456", 123456),
                 new List<Goods>(), Role.Customer),
-            new User(2L, "John", new CreditCard("123456", 123456),
+            new User(20L, "John", new CreditCard("123456", 123456),
                 new List<Goods>(), Role.Customer),
-            new User(3L, "Mike", new CreditCard("123456", 123456),
+            new User(30L, "Mike", new CreditCard("123456", 123456),
                 new List<Goods>(), Role.Customer),
-            new User(3L, "Alex", new CreditCard("154326", 156),
+            new User(40L, "Alex", new CreditCard("154326", 156),
                 new List<Goods>(), Role.Administrator)
         };
 

@@ -1,5 +1,20 @@
-﻿using Store.DBManager.Dao;
-using Store.Model;
+﻿var appContext = new AppContext();
+        var driver = new Driver(appContext);
+        driver.Starter();
+
+namespace Store.AppContext;
+
+public class AppContext
+{
+    public readonly DbContext DbContext;
+
+    public AppContext()
+    {
+        DbContext = new DbContext();
+    }
+}
+
+
 using Store.Model.Goods;
 using Store.Model.User;
 
